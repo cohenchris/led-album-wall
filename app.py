@@ -1,11 +1,13 @@
-from flask import Flask, request, jsonify
+import configparser
+from flask import Flask, request, jsonify, abort
 #fron rpi_ws281x import PixelStrip, Color
 
 app = Flask(__name__)
+DEBUG = True
+app.debug = True if DEBUG else False
 
-SUCCESS = {"message": "LED update succeeded!"}
-
-CHECK_ABORT = lambda ret: abort(500) if not ret else None
+CHECK = lambda ret: abort(500) if not ret else None
+LOG = lambda string: print(string) if DEBUG else None
 
 # LED strip configuration:
 LED_COUNT = 30          # Number of LED pixels.
@@ -28,6 +30,9 @@ def colorWipe(color, reverse=False):
   """
      Wipe color across LEDs, one light at a time.
   """
+
+  LOG("Attempting color wipe...")
+
   start, end, step = (strip.numPixels() - 1, -1, -1) if reverse else (0, strip.numPixels, 1)
   
   for i in range(start, end, step):
@@ -35,20 +40,30 @@ def colorWipe(color, reverse=False):
     #strip.show()
     time.sleep(LED_WIPE_INTERVAL / 1000.0)
 
+  LOG("Color wipe succeeded!")
+
+  return True
+
 
 def turnOn():
   """
      Turn on the LEDs in ambient RGB mode.
   """
+
+  LOG("Attempting to turn on LEDs...")
+
   ret = False
 
   # Wipe white across the strip
-  ret = colorWipe(Color(255, 255, 255))
+  #ret = colorWipe(Color(255, 255, 255))
+  ret = True
 
   if ret:
     LED_STATUS = "on"
     # Turn on RGB Ambient mode
     ret = ledAmbientRgb()
+
+  LOG("LEDs turned on successfully!")
 
   return ret
 
@@ -57,21 +72,38 @@ def turnOff():
   """
      Turn off LEDs in reverse.
   """
+
+  LOG("Attempting to turn off LEDs...")
+
   ret = False
 
-  ret = colorWipe(Color(0, 0, 0), reverse=True)
+  #ret = colorWipe(Color(0, 0, 0), reverse=True)
+  ret = True
 
   if ret:
     LED_STATUS = "off"
 
+  LOG("LEDs turned off successfully!")
   return ret
 
 
-def loadAlbumConfig():
+def ledAmbientRgb():
+  """
+     Default ambient RGB mode for LED strips
+  """
+  
+  LOG("Attempting to start ambient RGB...")
+
+  LOG("Ambient RGB started successfully!")
+  return True
+
+def loadConfig():
   """
      Load the albums.ini config file, which should contain 8 albums. This function should return an array
      of dictionaries, where each dictionary represents the config data
   """
+  LOG("Attempting to load album config...")
+
   ret = False
 
   config = configparser.ConfigParser()
@@ -85,12 +117,16 @@ def loadAlbumConfig():
 
     albumDict["albumName"] = config.get(keyName, "albumName")
     albumDict["artistName"] = config.get(keyName, "artistName")
+    albumDict["ledStartIndex"] = config.get(keyName, "ledStartIndex")
+    albumDict["ledEndIndex"] = config.get(keyName, "ledEndIndex")
+
     albums.append(albumDict)
 
   print(albums)
 
   ret = True
   
+  LOG("Album config loaded successfully!")
   return albums, ret
 
 
@@ -99,6 +135,9 @@ def highlightAlbum(ledStartIndex, ledEndIndex):
      Highlight the album at provided index. We should iterate through every LED, turning off LEDs that are
      not under the given albumIndex, and turning on LEDs that are under the given albumIndex
   """
+
+  LOG("Attempting to highlight album...")
+
   ret = False
 
   ret = ledStartIndex is not None and ledEndIndex is not None
@@ -107,47 +146,56 @@ def highlightAlbum(ledStartIndex, ledEndIndex):
     for i in range(strip.numPixels()):
       if ledStartIndex <= i <= ledEndIndex:
         # If LED is within range of album to light up, turn it to white
-        strip.setPixelColor(i, Color(255, 255, 255))
+        #strip.setPixelColor(i, Color(255, 255, 255))
+        pass
       else:
         # If LED is NOT within range, turn it off
-        strip.setPixelColor(i, Color(0, 0, 0))
+        #strip.setPixelColor(i, Color(0, 0, 0))
+        pass
       
-      strip.show()
-      time.sleep(LED_WIPE_INTERVAL / 1000.0)
+      #strip.show()
+      #time.sleep(LED_WIPE_INTERVAL / 1000.0)
 
+  LOG("Album highlighted successfully!")
   return ret
 
 
 def findPossibleAlbumMatch(artistName, albumName):
   """
-     Given an artistName and albumName, search the wall for a match.
+     Given an artistName and albumName, search the wall for a match. This API will succeed if a match is
+     found or not - a match is not required for this app to work.
   """
+
+  LOG("Attempting to find an album match...")
+
   found = False
   ret = False
   
-  # Check validity of parameters
-  ret = artistName is not None and albumName is not None
+  # This loads the provided albums.ini file, and returns them in an array of dictionaries
+  wallAlbums, ret = loadConfig()
   
   if ret:
-    # This loads the provided albums.ini file, and returns them in an array of dictionaries
-    wallAlbums, ret = loadAlbumConfig()
-  
-    if ret:
-      # Search for a match within albums on the wall
-      for album in wallAlbums:
-          # If there is a match, highlight the album on the wall
-          if album["artistName"] == artistName and album["albumName"] == albumName:
-              found = True
-              ret = highlightAlbum(album["ledStartIndex"], album["ledEndIndex"])
+    # Search for a match within albums on the wall
+    for album in wallAlbums:
+        # If there is a match, highlight the album on the wall
+        if album["artistName"] == artistName and album["albumName"] == albumName:
+            found = True
+            ret = highlightAlbum(album["ledStartIndex"], album["ledEndIndex"])
+            break
 
+  ret = True
+  LOG("Album match search attempt succeeded!")
   return found, ret
 
 
-@app.route("/wall", methods=['POST'])
-def wall():
+@app.route("/albumWall", methods=['POST'])
+def albumWall():
   """
      Main handler for album wall control
   """
+
+  LOG("Processing request...")
+
   ret = False
 
   data = request.get_json()
@@ -158,8 +206,12 @@ def wall():
   led_status = data.get("led_status")
   
   # Turn off LEDs
-  if led_status == "off" and led_status != G_LED_STATUS:
-    ret = turnOff()
+  if led_status == "off":
+    if led_status != G_LED_STATUS:
+      print("Turning off LEDs...")
+      ret = turnOff()
+      CHECK(ret)
+      print("LEDs turned off!")
   
   # Turn on LEDs
   elif led_status == "on":
@@ -177,11 +229,11 @@ def wall():
     if not albumFound:
       ret = turnOn()
       CHECK(ret)
+  else:
+    abort(500)
 
-    ret = True
-  
-  # Return response from the API, depending on the value of "ret"
-  True if ret else abort(500)
+  LOG("Request processed successfully!")
+  return jsonify({"message": "Success!"}), 200
 
 if __name__ == "__main__":
     app.run()
