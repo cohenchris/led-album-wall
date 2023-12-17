@@ -184,6 +184,10 @@ def findPossibleAlbumMatch(artistName, albumName):
   found = False
   global ambientRgbThread
   global ambientRgbStopEvent
+
+  if artistName is None or albumName is None:
+    # Both must be set for this function to run
+    return found
   
   # This loads the provided albums.ini file, and returns them in an array of dictionaries
   wallAlbums = loadConfig()
@@ -245,13 +249,17 @@ def albumWall():
     artistName = data.get("artistName")
     albumName = data.get("albumName")
 
+    if (artistName is None and albumName is not None) or (artistName is not None and albumName is None):
+      # Either both should be set, or neither should be set.
+      abort(400)
+
     albumFound = findPossibleAlbumMatch(artistName, albumName)
 
     if not albumFound:
       ret = turnOn()
 
   else:
-    abort(500)
+    abort(400)
 
   LOG("Request processed successfully!")
   return jsonify({"message": "Success!"}), 200
