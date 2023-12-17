@@ -3,7 +3,7 @@ import threading
 import time
 import random
 from flask import Flask, request, jsonify, abort
-fron rpi_ws281x import PixelStrip, Color
+from rpi_ws281x import PixelStrip, Color
 
 app = Flask(__name__)
 DEBUG = True
@@ -154,7 +154,7 @@ def highlightAlbum(ledStartIndex, ledEndIndex):
 
   LOG("Attempting to highlight album...")
 
-  if ledStartIndex is not None and ledEndIndex is not None
+  if ledStartIndex is not None and ledEndIndex is not None:
     for i in range(strip.numPixels()):
       if ledStartIndex <= i <= ledEndIndex:
         # If LED is within range of album to light up, turn it to white
@@ -195,7 +195,7 @@ def findPossibleAlbumMatch(artistName, albumName):
   # Search for a match within albums on the wall
   for album in wallAlbums:
       # If there is a match, highlight the album on the wall
-      LOG(f"Checking match against {album["albumName"]} by {album["artistName"}")
+      LOG(f"Checking match against {album['albumName']} by {album['artistName']}")
       if album["artistName"] == artistName and album["albumName"] == albumName:
           LOG("Match found!")
           found = True
@@ -264,3 +264,5 @@ def albumWall():
   LOG("Request processed successfully!")
   return jsonify({"message": "Success!"}), 200
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

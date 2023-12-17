@@ -14,7 +14,7 @@ This project is written for an ARM-based Raspberry Pi, which controls a WS2812B 
 
 ## Basic Functionality
 ### Endpoint
-When this flask endpoint is started, it will listen at `ip.of.pi:<port#>/albumWall`.
+When this flask endpoint is started, it will listen at `ip.of.pi:5000/albumWall`.
 
 ### Expected Format
 The API expects a JSON payload. The following fields are valid, and will be handled:
