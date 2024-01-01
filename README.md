@@ -64,13 +64,13 @@ Execute `chmod 644 albumwall.service` for correct file permissions.
 2. Reload Systemd and Start the Service
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start dynamic_led_album_wall
-sudo systemctl enable dynamic_led_album_wall
+sudo systemctl start albumwall.service
+sudo systemctl enable albumwall.service
 ```
 
 3. Check the Service Status
 ```bash
-sudo systemctl status dynamic_led_album_wall
+sudo systemctl status albumwall.service
 ```
 
 The output of this command should show something along these lines:
