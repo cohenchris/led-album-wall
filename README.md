@@ -58,7 +58,8 @@ SyslogIdentifier=dynamic_led_album_wall
 WantedBy=multi-user.target
 ```
 
-Place this service file into `/etc/systemd/system` directory.
+Place this service file into `/etc/systemd/system` directory. I named the file `albumwall.service`.
+Execute `chmod 644 albumwall.service` for correct file permissions.
 
 2. Reload Systemd and Start the Service
 ```bash
