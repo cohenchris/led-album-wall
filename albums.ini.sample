@@ -21,27 +21,3 @@ albumName = album3
 artistName = artist3
 ledStartIndex = 30
 ledEndIndex = 39
-
-[Album4]
-albumName = album4
-artistName = artist4
-ledStartIndex = 40
-ledEndIndex = 49
-
-[Album5]
-albumName = album5
-artistName = artist5
-ledStartIndex = 50
-ledEndIndex = 59
-
-[Album6]
-albumName = album6
-artistName = artist6
-ledStartIndex = 60
-ledEndIndex = 69
-
-[Album7]
-albumName = album7
-artistName = artist7
-ledStartIndex = 70
-ledEndIndex = 79
