@@ -63,5 +63,14 @@ sudo systemctl status albumwall.service
 
 The output of this command should show something along these lines:
 ```bash
-● albumwall.service - Dynamic LED Album Wall                                                                              Loaded: loaded (/etc/systemd/system/albumwall.service; enabled; vendor preset: enabled)                              Active: active (running) since Sat 2024-01-13 17:02:13 PST; 2s ago                                                 Main PID: 807 (python3)                                                                                                 Tasks: 1 (limit: 414)                                                                                                  CPU: 1.836s                                                                                                       CGroup: /system.slice/albumwall.service                                                                                      └─807 /usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py                                                                                                                                                                Jan 13 17:02:13 albumwall systemd[1]: Started Dynamic LED Album Wall.
+● albumwall.service - Dynamic LED Album Wall
+    Loaded: loaded (/etc/systemd/system/albumwall.service; enabled; vendor preset: enabled)
+    Active: active (running) since Sat 2024-01-13 17:02:13 PST; 2s ago
+  Main PID: 807 (python3)
+    Tasks: 1 (limit: 414)
+      CPU: 1.836s
+    CGroup: /system.slice/albumwall.service
+            └─807 /usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py
+
+Jan 13 17:02:13 albumwall systemd[1]: Started Dynamic LED Album Wall.
 ```
