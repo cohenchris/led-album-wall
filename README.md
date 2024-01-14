@@ -48,7 +48,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 /path/to/dynamic-led-album-wall/app.py
-WorkingDirectory=/path/to/dynamic-led-album-wal
+WorkingDirectory=/path/to/dynamic-led-album-wall
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
