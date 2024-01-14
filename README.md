@@ -42,20 +42,7 @@ This file can be deployed in a variety of ways. Personally, I created a systemd 
 
 1. Create a Systemd Service File:
 ```service
-[Unit]
-Description=Dynamic LED Album Wall
-After=network.target
-
-[Service]
-ExecStart=/usr/bin/python3 /path/to/dynamic-led-album-wall/app.py
-WorkingDirectory=/path/to/dynamic-led-album-wall
-Restart=always
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=dynamic_led_album_wall
-
-[Install]
-WantedBy=multi-user.target
+[Unit]                                                                                                               Description=Dynamic LED Album Wall                                                                                   After=network.target                                                                                                                                                                                                                      [Service]                                                                                                            User=root                                                                                                            ExecStart=/usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py                                                                                                                                                                         [Install]                                                                                                            WantedBy=multi-user.target
 ```
 
 Place this service file into `/etc/systemd/system` directory. I named the file `albumwall.service`.
@@ -76,5 +63,5 @@ sudo systemctl status albumwall.service
 
 The output of this command should show something along these lines:
 ```bash
-TODO
+● albumwall.service - Dynamic LED Album Wall                                                                              Loaded: loaded (/etc/systemd/system/albumwall.service; enabled; vendor preset: enabled)                              Active: active (running) since Sat 2024-01-13 17:02:13 PST; 2s ago                                                 Main PID: 807 (python3)                                                                                                 Tasks: 1 (limit: 414)                                                                                                  CPU: 1.836s                                                                                                       CGroup: /system.slice/albumwall.service                                                                                      └─807 /usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py                                                                                                                                                                Jan 13 17:02:13 albumwall systemd[1]: Started Dynamic LED Album Wall.
 ```

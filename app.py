@@ -7,7 +7,7 @@ from rpi_ws281x import PixelStrip, Color
 import re
 
 app = Flask(__name__)
-DEBUG = True
+DEBUG = False
 app.debug = True if DEBUG else False
 
 LOG = lambda string: print(string) if DEBUG else None
