@@ -42,7 +42,16 @@ This file can be deployed in a variety of ways. Personally, I created a systemd 
 
 1. Create a Systemd Service File:
 ```service
-[Unit]                                                                                                               Description=Dynamic LED Album Wall                                                                                   After=network.target                                                                                                                                                                                                                      [Service]                                                                                                            User=root                                                                                                            ExecStart=/usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py                                                                                                                                                                         [Install]                                                                                                            WantedBy=multi-user.target
+[Unit]
+Description=Dynamic LED Album Wall
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py
+
+[Install]
+WantedBy=multi-user.target
 ```
 
 Place this service file into `/etc/systemd/system` directory. I named the file `albumwall.service`.
