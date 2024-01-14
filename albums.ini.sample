@@ -1,23 +1,23 @@
 [Album0]
-albumName = album0
-artistName = artist0
-ledStartIndex = 0
-ledEndIndex = 9
+albumName = The New Abnormal
+artistName = The Strokes
+ledStartIndex = 69
+ledEndIndex = 89
 
 [Album1]
-albumName = album1
-artistName = artist1
-ledStartIndex = 10
-ledEndIndex = 19
+albumName = I Don't Like Shit, I Don't Go Outside: An Album by Earl Sweatshirt
+artistName = Earl Sweatshirt
+ledStartIndex = 47
+ledEndIndex = 66
 
 [Album2]
-albumName = album2
-artistName = artist2
-ledStartIndex = 20
-ledEndIndex = 29
+albumName = Faces
+artistName = Mac Miller
+ledStartIndex = 24
+ledEndIndex = 44
 
 [Album3]
-albumName = album3
-artistName = artist3
-ledStartIndex = 30
-ledEndIndex = 39
+albumName = Missing Molars
+artistName = Genesis Owusu
+ledStartIndex = 1
+ledEndIndex = 21

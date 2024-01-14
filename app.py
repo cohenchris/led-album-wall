@@ -4,6 +4,7 @@ import time
 import random
 from flask import Flask, request, jsonify, abort
 from rpi_ws281x import PixelStrip, Color
+import re
 
 app = Flask(__name__)
 DEBUG = True
@@ -11,14 +12,16 @@ app.debug = True if DEBUG else False
 
 LOG = lambda string: print(string) if DEBUG else None
 
+CLEAR_NON_ALPHANUMERIC_CHARS = lambda string: re.sub(r'[^a-zA-Z0-9\s]', '', string)
+
 # LED strip configuration:
-LED_COUNT = 30            # Number of LED pixels.
-LED_PIN = 18              # GPIO pin connected to the data line.
+LED_COUNT = 91            # Number of LED pixels.
+LED_PIN = 18              # GPIO Pin to which the 'B' input is connected
 LED_FREQ_HZ = 800000      # LED signal frequency in hertz (usually 800kHz)
 LED_DMA = 10              # DMA channel to use for generating signal.
 LED_BRIGHTNESS = 255      # Set to 0 for darkest and 255 for brightest.
 LED_INVERT = False        # True to invert the signal (when using NPN transistor level shift).
-LED_WIPE_INTERVAL_MS = 50 # When wiping all LEDs, this is the delay between wiping each pixel (in ms)
+LED_WIPE_INTERVAL_MS = 20 # When wiping all LEDs, this is the delay between wiping each pixel (in ms)
 
 # Initialize LED strips
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
@@ -26,6 +29,8 @@ strip.begin()
 
 # Global variables
 G_LED_STATUS = "off"
+G_SELECTED_ARTIST = ""
+G_SELECTED_ALBUM = ""
 
 # Define ambient RGB thread and stop event
 ambientRgbStopEvent = None
@@ -33,16 +38,15 @@ ambientRgbThread = None
 
 ######################################################################
 
-def colorWipe(color, reverse=False):
+def colorWipe(color, start=0, end=strip.numPixels()):
   """
      Wipe color across LEDs, one light at a time.
   """
 
   LOG("Attempting color wipe...")
+  LOG(f"Wiping from {start} to {end}")
 
-  start, end, step = (strip.numPixels() - 1, -1, -1) if reverse else (0, strip.numPixels, 1)
-  
-  for i in range(start, end, step):
+  for i in range(end, start - 1, -1):
     strip.setPixelColor(i, color)
     strip.show()
     time.sleep(LED_WIPE_INTERVAL_MS / 1000.0)
@@ -57,6 +61,9 @@ def turnOn():
   """
 
   LOG("Attempting to turn on LEDs...")
+
+  colorWipe(Color(0, 0, 0))
+  colorWipe(Color(255, 255, 255))
 
   global G_LED_STATUS
   global ambientRgbThread
@@ -76,7 +83,7 @@ def turnOn():
 
 def turnOff():
   """
-     Turn off LEDs in reverse.
+     Turn off LEDs
   """
 
   LOG("Attempting to turn off LEDs...")
@@ -93,26 +100,51 @@ def turnOff():
     ambientRgbStopEvent = None
     LOG("Killed ambient RGB.")
 
-  colorWipe(Color(0, 0, 0), reverse=True)
+  colorWipe(Color(0, 0, 0))
 
   G_LED_STATUS = "off"
   LOG("LEDs turned off successfully!")
 
 ######################################################################
 
+def wheel(pos):
+    """
+       Generate rainbow colors across 0-255 positions.
+    """
+
+    if pos < 85:
+        return Color(pos * 3, 255 - pos * 3, 0)
+    elif pos < 170:
+        pos -= 85
+        return Color(255 - pos * 3, 0, pos * 3)
+    else:
+        pos -= 170
+        return Color(0, pos * 3, 255 - pos * 3)
+
+######################################################################
+
 def ledAmbientRgb(stopEvent):
   """
-     Default ambient RGB mode for LED strips
+     Draw rainbow that uniformly distributes itself across all pixels.
   """
   
   LOG("Beginning ambient RGB mode...")
+  iterations = 5
 
   while not stopEvent.is_set():
-    LOG("Executing RGB Ambient Wipe")
-    # Wipe to some random color
-    colorWipe((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-    # Wipe to some other random color in reverse
-    colorWipe((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), True)
+    LOG("Executing RGB ambient animation")
+    for j in range(256 * iterations):
+        if stopEvent.is_set():
+          break
+
+        for i in range(strip.numPixels()):
+            if stopEvent.is_set():
+                break
+            strip.setPixelColor(i, wheel(
+                (int(i * 256 / strip.numPixels()) + j) & 255))
+
+        strip.show()
+        time.sleep(LED_WIPE_INTERVAL_MS / 1000.0)
 
   LOG("Ambient RGB mode stopped successfully!")
 
@@ -130,14 +162,13 @@ def loadConfig():
 
   albums = []
 
-  for i in range(len(albumDict)):
+  for section in config.sections():
     albumDict = {}
-    keyName = f'Album{i}'
 
-    albumDict["albumName"] = config.get(keyName, "albumName")
-    albumDict["artistName"] = config.get(keyName, "artistName")
-    albumDict["ledStartIndex"] = config.get(keyName, "ledStartIndex")
-    albumDict["ledEndIndex"] = config.get(keyName, "ledEndIndex")
+    albumDict["albumName"] = config.get(section, "albumName")
+    albumDict["artistName"] = config.get(section, "artistName")
+    albumDict["ledStartIndex"] = config.get(section, "ledStartIndex")
+    albumDict["ledEndIndex"] = config.get(section, "ledEndIndex")
 
     albums.append(albumDict)
 
@@ -154,20 +185,11 @@ def highlightAlbum(ledStartIndex, ledEndIndex):
 
   LOG("Attempting to highlight album...")
 
-  if ledStartIndex is not None and ledEndIndex is not None:
-    for i in range(strip.numPixels()):
-      if ledStartIndex <= i <= ledEndIndex:
-        # If LED is within range of album to light up, turn it to white
-        strip.setPixelColor(i, Color(255, 255, 255))
-        strip.show()
-        pass
-      else:
-        # If LED is NOT within range, turn it off
-        strip.setPixelColor(i, Color(0, 0, 0))
-        strip.show()
-        pass
-      
-      time.sleep(LED_WIPE_INTERVAL_MS / 1000.0)
+  # Turn all LEDs off
+  turnOff()
+
+  # Highlight album in white
+  colorWipe(Color(255, 255, 255), ledStartIndex, ledEndIndex)
 
   LOG("Album highlighted successfully!")
 
@@ -184,6 +206,8 @@ def findPossibleAlbumMatch(artistName, albumName):
   found = False
   global ambientRgbThread
   global ambientRgbStopEvent
+  global G_SELECTED_ARTIST
+  global G_SELECTED_ALBUM
 
   if artistName is None or albumName is None:
     # Both must be set for this function to run
@@ -194,25 +218,37 @@ def findPossibleAlbumMatch(artistName, albumName):
   
   # Search for a match within albums on the wall
   for album in wallAlbums:
+      # Clean up strings
+      album['albumName'] = CLEAR_NON_ALPHANUMERIC_CHARS(album['albumName'])
+      album['artistName'] = CLEAR_NON_ALPHANUMERIC_CHARS(album['artistName'])
+      artistName = CLEAR_NON_ALPHANUMERIC_CHARS(artistName)
+      albumName = CLEAR_NON_ALPHANUMERIC_CHARS(albumName)
+
       # If there is a match, highlight the album on the wall
       LOG(f"Checking match against {album['albumName']} by {album['artistName']}")
       if album["artistName"] == artistName and album["albumName"] == albumName:
           LOG("Match found!")
           found = True
-          # First, stop ambient RGB if it is running
-          if ambientRgbThread and ambientRgbThread.is_alive():
-            ambientRgbStopEvent.set()
-            ambientRgbThread.join()
-            ambientRgbThread = None
-            ambientRgbStopEvent = None
-            LOG("Killed ambient RGB.")
           # Highlight album on wall
-          highlightAlbum(int(album["ledStartIndex"]), int(album["ledEndIndex"]))
+          if G_SELECTED_ARTIST != artistName and G_SELECTED_ALBUM != albumName:
+            highlightAlbum(int(album["ledStartIndex"]), int(album["ledEndIndex"]))
+            G_SELECTED_ARTIST = artistName
+            G_SELECTED_ALBUM = albumName
           break
       LOG("No match, continuing search...")
 
   LOG("Album match search finished!")
   return found
+
+######################################################################
+
+@app.route("/ledStatus", methods=["GET"])
+def ledStatus():
+  """
+     Return status of LEDs
+  """
+  LOG("Returning LED Status")
+  return jsonify({"message": "Success!", "ledStatus": G_LED_STATUS}), 200
 
 ######################################################################
 
@@ -225,6 +261,9 @@ def albumWall():
   LOG("Processing request...")
 
   data = request.get_json()
+
+  LOG("Retrieved data:")
+  LOG(data)
   
   # Update the LED strips based on the provided data
   
