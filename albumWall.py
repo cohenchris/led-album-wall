@@ -22,12 +22,12 @@ CLEAR_NON_ALPHANUMERIC_CHARS = lambda s: (''.join(char.lower() \
 
 # LED strip configuration:
 LED_COUNT = 91            # Number of LED pixels.
-LED_PIN = 18              # GPIO Pin to which the 'B' input is connected
-LED_FREQ_HZ = 800000      # LED signal frequency in hertz (usually 800kHz)
-LED_DMA = 10              # DMA channel to use for generating signal.
+LED_PIN = 18              # GPIO Pin to which the LED strip is connected.
+LED_FREQ_HZ = 800000      # LED signal frequency in hertz (usually 800kHz).
+LED_DMA = 10              # DMA channel to use for generating signal (try 10).
 LED_BRIGHTNESS = 255      # Set to 0 for darkest and 255 for brightest.
 LED_INVERT = False        # True to invert the signal (when using NPN transistor level shift).
-LED_WIPE_INTERVAL_MS = 10 # When wiping all LEDs, this is the delay between wiping each pixel (in ms)
+LED_WIPE_INTERVAL_MS = 11 # When wiping all LEDs, this is the delay between wiping each pixel (in ms)
 
 # Initialize LED strip
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
