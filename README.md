@@ -38,7 +38,7 @@ The following diagram illustrates the behavior of this API:
 
 
 ## Deployment
-This file can be deployed in a variety of ways. This is intended to run on your local network, so I'm ignoring the warnings about using a production WSGI server. Personally, I just created a systemd service to run the flask app:
+This file can be deployed in a variety of ways. This is intended to run on your local network without internet connection, so I'm ignoring the warnings about using a production WSGI server. Personally, I just created a systemd service to run the flask app with python3:
 
 1. Create a Systemd Service File:
 ```service
