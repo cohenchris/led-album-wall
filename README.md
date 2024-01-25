@@ -38,7 +38,7 @@ The following diagram illustrates the behavior of this API:
 
 
 ## Deployment
-This file can be deployed in a variety of ways. Personally, I created a systemd service:
+This file can be deployed in a variety of ways. This is intended to run on your local network, so I'm ignoring the warnings about using a production WSGI server. Personally, I just created a systemd service to run the flask app:
 
 1. Create a Systemd Service File:
 ```service
@@ -48,7 +48,7 @@ After=network.target
 
 [Service]
 User=root
-ExecStart=/usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py
+ExecStart=/usr/bin/python3 /home/pi/dynamic-led-album-wall/albumWall.py
 
 [Install]
 WantedBy=multi-user.target
@@ -79,7 +79,7 @@ The output of this command should show something along these lines:
     Tasks: 1 (limit: 414)
       CPU: 1.836s
     CGroup: /system.slice/albumwall.service
-            └─807 /usr/bin/python3 /home/pi/dynamic-led-album-wall/app.py
+            └─807 /usr/bin/python3 /home/pi/dynamic-led-album-wall/albumWall.py
 
 Jan 13 17:02:13 albumwall systemd[1]: Started Dynamic LED Album Wall.
 ```
