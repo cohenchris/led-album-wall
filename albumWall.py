@@ -4,10 +4,14 @@ import time
 from flask import Flask, request, jsonify, abort
 from rpi_ws281x import PixelStrip, Color
 import inspect
+import argparse
 
+# Debug flag
+parser = argparse.ArgumentParser(description='Dynamic LED Album Wall')
+parser.add_argument('--debug', action='store_true', help='Enable debug logs')
+
+# Flask App
 app = Flask(__name__)
-DEBUG = False
-app.debug = True if DEBUG else False
 
 # String normalization
 CLEAR_NON_ALPHANUMERIC_CHARS = lambda s: (''.join(char.lower() \
@@ -53,7 +57,7 @@ def LOG(*args, **kwargs):
   """
 
   # Do not print anything if not in debug
-  if not DEBUG:
+  if not app.debug:
     return
 
   frame = inspect.currentframe().f_back
@@ -111,7 +115,7 @@ def colorWipe(color, firstLED=0, lastLED=strip.numPixels(), reverse=False):
   """
 
   LOG("Attempting color wipe...")
-  LOG(f"Wiping from {start} to {end}") if not reverse else LOG(f"Wiping from {end} to {start}")
+  LOG(f"Wiping from {firstLED} to {lastLED}") if not reverse else LOG(f"Wiping from {lastLED} to {firstLED}")
 
   # Set range to iterate over based on 'reverse' argument
   start, end, step = (lastLED, firstLED - 1, -1) if not reverse else (firstLED, lastLED + 1, 1)
@@ -196,6 +200,7 @@ def turnOff():
   LOG("Attempting to turn off LEDs...")
 
   global G_LED_STATUS
+  global G_IS_ALBUM_HIGHLIGHTED
   global G_AMBIENT_RGB_THREAD
   global G_AMBIENT_RGB_STOP_EVENT
 
@@ -208,14 +213,13 @@ def turnOff():
     LOG("Killed ambient RGB.")
 
   if G_IS_ALBUM_HIGHLIGHTED:
-    clearAbumIfHighlighted()
+    clearAlbumIfHighlighted()
   else:
     # Turn off all LEDs in reverse
     colorWipe(Color(0, 0, 0), reverse=True)
 
   G_LED_STATUS = "off"
   LOG("LEDs turned off successfully!")
-
 
 ################################################################################
 
@@ -256,11 +260,19 @@ def clearAlbumIfHighlighted():
 
   LOG("Checking to see if album is currently highlighted...")
 
+  global G_LED_STATUS
   global G_IS_ALBUM_HIGHLIGHTED
   global G_SELECTED_ARTIST
   global G_SELECTED_ALBUM
   global G_SELECTED_LED_START_INDEX
   global G_SELECTED_LED_END_INDEX
+
+  print(G_LED_STATUS)
+  print(G_IS_ALBUM_HIGHLIGHTED)
+  print(G_SELECTED_ARTIST)
+  print(G_SELECTED_ALBUM)
+  print(G_SELECTED_LED_START_INDEX)
+  print(G_SELECTED_LED_END_INDEX)
 
   if G_IS_ALBUM_HIGHLIGHTED:
     LOG("Album currently highlighted, clearing first.")
@@ -272,6 +284,7 @@ def clearAlbumIfHighlighted():
               reverse=True)
 
     # Reset global state variables for the currently highlighted album
+    G_LED_STATUS = "off"
     G_IS_ALBUM_HIGHLIGHTED = False
     G_SELECTED_ARTIST = ""
     G_SELECTED_ALBUM = ""
@@ -280,7 +293,6 @@ def clearAlbumIfHighlighted():
 
   else:
     LOG("No album highlighted, continuing.")
-
 
 ################################################################################
 
@@ -291,11 +303,15 @@ def highlightAlbum(ledStartIndex, ledEndIndex):
 
   LOG("Attempting to highlight album...")
 
+  global G_LED_STATUS
+
   # Turn all LEDs off
-  turnOff()
+  #turnOff()
 
   # Highlight album in white
   colorWipe(Color(255, 255, 255), ledStartIndex, ledEndIndex)
+
+  G_LED_STATUS = "on"
 
   LOG("Album highlighted successfully!")
 
@@ -338,11 +354,11 @@ def handlePossibleAlbumMatch(artistName, albumName):
     if album["artistName"] == artistName and album["albumName"] == albumName:
       LOG("Match found!")
       found = True
-      clearAlbumIfHighlighted()
+      turnOff()
       G_SELECTED_ARTIST = artistName
       G_SELECTED_ALBUM = albumName
-      G_SELECTED_LED_START_INDEX = album["ledStartIndex"]
-      G_SELECTED_LED_END_INDEX = album["ledEndIndex"]
+      G_SELECTED_LED_START_INDEX = int(album["ledStartIndex"])
+      G_SELECTED_LED_END_INDEX = int(album["ledEndIndex"])
       G_IS_ALBUM_HIGHLIGHTED = True
       highlightAlbum(G_SELECTED_LED_START_INDEX, G_SELECTED_LED_END_INDEX)
       break
@@ -363,6 +379,8 @@ def ledStatus():
   """
 
   LOG("Returning LED Status")
+  global G_LED_STATUS
+
   return jsonify({"message": "Success!", "ledStatus": G_LED_STATUS}), 200
 
 ################################################################################
@@ -378,10 +396,11 @@ def albumWall():
   LOG("Retrieved data:")
   LOG(data)
 
+  global G_LED_STATUS
   global G_IS_ALBUM_HIGHLIGHTED
   global G_SELECTED_ARTIST
   global G_SELECTED_ALBUM
-  
+
   # Parse incoming JSON data
   ledStatus = data.get("ledStatus")
   artistName = data.get("artistName")
@@ -438,6 +457,10 @@ def albumWall():
 
 
 if __name__ == "__main__":
+  # Check for debug flag
+  args = parser.parse_args()
+  app.debug = True if args.debug else False
+
   # Start single-threaded flask app to avoid race conditions.
   # No advantage to multithreading in this app, only headaches.
   app.run(host="0.0.0.0", port=80, threaded=False)
