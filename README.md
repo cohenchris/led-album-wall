@@ -4,10 +4,10 @@ This project is written for an ARM-based Raspberry Pi, which controls a WS2812B 
 
 # Images and Demo
 
-![Setup](setup.webp)
-![Pi](pi.webp)
-![LEDs](leds.webp)
 ![Demo](demo.gif)
+<img src="setup.webp" style="max-width: 750px;"/>
+<img src="pi.webp" style="max-width: 750px;"/>
+<img src="leds.webp" style="max-width: 750px;"/>
 
 ## Requirements
 - ARM-based Raspberry Pi
