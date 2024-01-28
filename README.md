@@ -2,15 +2,20 @@
 
 This project is written for an ARM-based Raspberry Pi, which controls a WS2812B individually-addressable LED strip.
 
+# Images and Demo
+
+<div style="display: flex; justify-content: center">
+<img src="setup.webp" style="max-width: 500px"/>
+<img src="pi.webp" style="max-width: 500px"/>
+<img src="leds.webp" style="max-width: 500px"/>
+</div>
+
+<video width="320" height="240" controls>
+  <source src="demo.mov" type="video/mp4">
+</video>
 ## Requirements
 - ARM-based Raspberry Pi
 - Individually-addressable LED strip (I used a WS2812B model)
-
-**TODO:**
-- Photo of albums on wall
-- Photo of LED strips
-- Photo of Raspberry Pi hooked up
-
 
 ## Basic Functionality
 ### Endpoint
