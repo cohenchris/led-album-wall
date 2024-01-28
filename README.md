@@ -13,6 +13,7 @@ This project is written for an ARM-based Raspberry Pi, which controls a WS2812B 
 <video width="320" height="240" controls>
   <source src="demo.mov" type="video/mp4">
 </video>
+
 ## Requirements
 - ARM-based Raspberry Pi
 - Individually-addressable LED strip (I used a WS2812B model)
