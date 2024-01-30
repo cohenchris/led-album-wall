@@ -305,9 +305,6 @@ def highlightAlbum(ledStartIndex, ledEndIndex):
 
   global G_LED_STATUS
 
-  # Turn all LEDs off
-  #turnOff()
-
   # Highlight album in white
   colorWipe(Color(255, 255, 255), ledStartIndex, ledEndIndex)
 
