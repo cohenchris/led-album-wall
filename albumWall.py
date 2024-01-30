@@ -317,7 +317,7 @@ def highlightAlbum(ledStartIndex, ledEndIndex):
 def handlePossibleAlbumMatch(artistName, albumName):
   """
      Given an artistName and albumName, search the wall for a match.
-     This API will succeed if a match is found or not - a match is
+     This function will succeed if a match is found or not - a match is
      not required for this app to work.
   """
 
