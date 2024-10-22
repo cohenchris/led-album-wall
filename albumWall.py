@@ -267,13 +267,6 @@ def clearAlbumIfHighlighted():
   global G_SELECTED_LED_START_INDEX
   global G_SELECTED_LED_END_INDEX
 
-  print(G_LED_STATUS)
-  print(G_IS_ALBUM_HIGHLIGHTED)
-  print(G_SELECTED_ARTIST)
-  print(G_SELECTED_ALBUM)
-  print(G_SELECTED_LED_START_INDEX)
-  print(G_SELECTED_LED_END_INDEX)
-
   if G_IS_ALBUM_HIGHLIGHTED:
     LOG("Album currently highlighted, clearing first.")
 
