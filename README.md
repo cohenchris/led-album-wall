@@ -5,9 +5,9 @@ This project is written for an ARM-based Raspberry Pi, which controls a WS2812B 
 # Images and Demo
 
 ![Demo](demo.gif)
-<img src="setup.webp" style="max-width: 750px;"/>
-<img src="pi.webp" style="max-width: 750px;"/>
-<img src="leds.webp" style="max-width: 750px;"/>
+<img src="photos/setup.webp" style="max-width: 750px;"/>
+<img src="photos/pi.webp" style="max-width: 750px;"/>
+<img src="photos/leds.webp" style="max-width: 750px;"/>
 
 ## Requirements
 - ARM-based Raspberry Pi
@@ -35,7 +35,7 @@ If either of these conditions are not met, the API will respond with a `400 Bad 
 
 ### Logic Behavior
 The following diagram illustrates the behavior of this API:
-![Logic Flowchart](./DynamicAlbumWall.png)
+![Logic Flowchart](./photos/DynamicAlbumWall.png)
 
 
 ## Deployment
