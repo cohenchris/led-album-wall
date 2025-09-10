@@ -1,0 +1,12 @@
+[Unit]
+Description=Dynamic LED Album Wall
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/usr/bin/python3 /path/to/led-album-wall/albumWall.py
+WorkingDirectory=/path/to/led-album-wall
+
+[Install]
+WantedBy=multi-user.target
