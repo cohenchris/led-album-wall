@@ -3,11 +3,10 @@
 This project is written for an ARM-based Raspberry Pi, which controls a WS2812B individually-addressable LED strip.
 
 # Images and Demo
-
-![Demo](demo.gif)
-<img src="photos/setup.webp" style="max-width: 750px;"/>
-<img src="photos/pi.webp" style="max-width: 750px;"/>
-<img src="photos/leds.webp" style="max-width: 750px;"/>
+<img src="photos/demo.gif" style="width: 750px;"/>
+<img src="photos/setup.webp" style="width: 750px;"/>
+<img src="photos/pi.webp" style="width: 750px;"/>
+<img src="photos/leds.webp" style="width: 750px;"/>
 
 ## Requirements
 - ARM-based Raspberry Pi
